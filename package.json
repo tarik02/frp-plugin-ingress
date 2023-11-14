@@ -1,0 +1,25 @@
+{
+  "name": "frp-plugin-ingress",
+  "license": "MIT",
+  "packageManager": "yarn@4.0.2",
+  "type": "module",
+  "version": "0.1.0",
+  "bin": "./dist/main.js",
+  "files": [
+    "./dist/*"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc",
+    "prepack": "run build"
+  },
+  "dependencies": {
+    "@kubernetes/client-node": "^0.20.0",
+    "fastify": "^4.24.3",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.1.2",
+    "typescript": "^5.2.2"
+  }
+}

@@ -1,0 +1,14 @@
+apiVersion: v2
+description: Plugin for frp that creates kubernetes Ingress objects for http proxy servers.
+name: frp-plugin-ingress
+version: 0.1.0
+appVersion: v0.1.0
+sources:
+- https://github.com/tarik02/frp-plugin-ingress
+maintainers:
+- name: tarik02
+  email: taras.fomin@gmail.com
+dependencies:
+- name: common
+  repository: https://bjw-s.github.io/helm-charts
+  version: 2.0.3

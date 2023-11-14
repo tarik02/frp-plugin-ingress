@@ -1,0 +1,126 @@
+---
+{{/* Make sure all variables are set properly */}}
+{{- include "bjw-s.common.loader.init" . }}
+
+{{/* Validate */}}
+{{- if and (not .Values.subDomain.enabled) (ne (toString .Values.allowCustomDomains) "true") }}
+{{- $_ := fail "either subDomain.enabled or allowCustomDomains must be enabled" }}
+{{- end }}
+
+{{/* Append the hardcoded settings */}}
+{{- define "frp-plugin-ingress.hardcodedValues" -}}
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          tag: {{ default .Chart.AppVersion .Values.controllers.main.containers.main.image.tag }}
+        envFrom:
+          - configMapRef:
+              name: {{ printf "%s-env" (include "bjw-s.common.lib.chart.names.fullname" .) | quote }}
+          {{- with (default list .Values.controllers.main.containers.main.envFrom) }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        probes:
+          liveness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /healthz
+                port: 7001
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /readyz
+                port: 7001
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          startup:
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /healthz
+                port: 7001
+              failureThreshold: 30
+              periodSeconds: 10
+
+service:
+  main:
+    enabled: true
+    ports:
+      http:
+        enabled: true
+        port: 7001
+
+serviceAccount:
+  create: {{ .Values.rbac.enabled }}
+
+configMaps:
+  env:
+    data:
+      FRP_INGRESS_LOG_LEVEL: {{ .Values.log.level | quote }}
+
+      FRP_INGRESS_HOST: '0.0.0.0'
+      FRP_INGRESS_PORT: '7001'
+
+      FRP_INGRESS_NAMESPACE: {{ .Release.Namespace | quote }}
+      FRP_INGRESS_APP_INSTANCE: {{ .Release.Name }}
+      
+      {{- if .Values.subDomain.enabled }}
+      FRP_INGRESS_SUB_DOMAIN_HOST: {{ required "subDomain.host is required" .Values.subDomain.host | quote }}
+      {{- with .Values.subDomain.secretName }}
+      FRP_INGRESS_SUB_DOMAIN_SECRET_NAME: {{ quote . }}
+      {{- end }}
+      {{- end }}
+
+      FRP_INGRESS_ALLOW_CUSTOM_DOMAINS: {{ .Values.allowCustomDomains | quote }}
+
+      {{- with .Values.ingressTemplate }}
+      {{- with .className }}
+      FRP_INGRESS_INGRESS_CLASS_NAME: {{ quote . }}
+      {{- end }}
+      FRP_INGRESS_INGRESS_ANNOTATIONS: {{ .annotations | toJson | quote }}
+      FRP_INGRESS_INGRESS_LABELS: {{ .labels | toJson | quote }}
+      {{- end }}
+
+      {{- with .Values.frpService }}
+      FRP_INGRESS_INGRESS_SERVICE_NAME: {{ required "frpService.name is required" .name }}
+      {{- if .port.name }}
+      FRP_INGRESS_INGRESS_SERVICE_PORT_NAME: {{ .name }}
+      {{- else if .port.number }}
+      FRP_INGRESS_INGRESS_SERVICE_PORT_NUMBER: {{ .port.number | quote }}
+      {{- else }}
+      {{ $_ := fail "frpService.port.name or frpService.port.number is required" }}
+      {{- end }}
+      {{- end }}
+{{- end -}}
+
+{{- define "frp-plugin-ingress.overwriteValues" -}}
+controllers:
+  main:
+    containers:
+      main:
+        envFrom:
+          - configMapRef:
+              name: {{ printf "%s-env" (include "bjw-s.common.lib.chart.names.fullname" .) | quote }}
+          {{- with (default list .Values.controllers.main.containers.main.envFrom) }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+{{- end -}}
+
+{{/* Render the templates */}}
+{{- $ctx := deepCopy . -}}
+{{- $_ := include "frp-plugin-ingress.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+{{- $_ := include "frp-plugin-ingress.overwriteValues" . | fromYaml | mergeOverwrite $ctx.Values -}}
+
+{{- include "bjw-s.common.loader.all" $ctx }} 

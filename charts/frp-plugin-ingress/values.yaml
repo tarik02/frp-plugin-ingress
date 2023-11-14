@@ -1,0 +1,39 @@
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          repository: ghcr.io/tarik02/frp-plugin-ingress
+          pullPolicy: IfNotPresent
+
+rbac:
+  enabled: true
+
+  role:
+    name: ''
+
+  roleBinding:
+    name: ''
+
+  serviceAccount:
+    name: ''
+
+log:
+  level: info
+
+subDomain:
+  enabled: false
+  host: 'example.com'
+  secretName: ''
+
+allowCustomDomains: ignore
+
+ingressTemplate:
+  className: ''
+  annotations: {}
+  labels: {}
+
+frpService:
+  name: frp
+  port:
+    name: 'http'
