@@ -44,6 +44,3 @@ This project is licensed under the [MIT License](LICENSE). Feel free to use, mod
 ## Contributions
 
 Contributions are welcome! If you have any ideas, bug reports, or feature requests, please open an issue or submit a pull request.
-
----
-Feel free to customize this template further based on additional details or specific instructions for your project.
