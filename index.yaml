@@ -2,6 +2,25 @@ apiVersion: v1
 entries:
   frp-plugin-ingress:
   - apiVersion: v2
+    appVersion: 0.1.3
+    created: "2023-12-06T15:39:20.966613061Z"
+    dependencies:
+    - name: common
+      repository: https://bjw-s.github.io/helm-charts
+      version: 2.2.0
+    description: Plugin for frp that creates kubernetes Ingress objects for http proxy
+      servers.
+    digest: 4e8f6d2ece8b6ec1e774d07084ff44d27304d45edfda9f7be9cfeff734ac2532
+    maintainers:
+    - email: taras.fomin@gmail.com
+      name: tarik02
+    name: frp-plugin-ingress
+    sources:
+    - https://github.com/tarik02/frp-plugin-ingress
+    urls:
+    - https://github.com/tarik02/frp-plugin-ingress/releases/download/frp-plugin-ingress-0.1.3/frp-plugin-ingress-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
     appVersion: 0.1.2
     created: "2023-12-06T13:14:16.190244396Z"
     dependencies:
@@ -39,4 +58,4 @@ entries:
     urls:
     - https://github.com/tarik02/frp-plugin-ingress/releases/download/frp-plugin-ingress-0.1.1/frp-plugin-ingress-0.1.1.tgz
     version: 0.1.1
-generated: "2023-12-06T13:14:16.190258172Z"
+generated: "2023-12-06T15:39:20.966630914Z"
