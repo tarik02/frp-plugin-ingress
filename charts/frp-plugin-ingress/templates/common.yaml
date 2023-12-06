@@ -91,6 +91,7 @@ configMaps:
       {{- end }}
       FRP_INGRESS_INGRESS_ANNOTATIONS: {{ .annotations | toJson | quote }}
       FRP_INGRESS_INGRESS_LABELS: {{ .labels | toJson | quote }}
+      FRP_INGRESS_METADATA_ALLOWED_ANNOTATIONS: {{ .allowedMetadataAnnotations | join "," | quote }}
       {{- end }}
 
       {{- with .Values.frpService }}

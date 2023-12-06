@@ -32,6 +32,7 @@ ingressTemplate:
   className: ''
   annotations: {}
   labels: {}
+  allowedMetadataAnnotations: []
 
 frpService:
   name: frp

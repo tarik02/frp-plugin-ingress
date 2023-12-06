@@ -29,6 +29,8 @@ const env = z.object({
   FRP_INGRESS_INGRESS_SERVICE_NAME: z.string(),
   FRP_INGRESS_INGRESS_SERVICE_PORT_NAME: z.string().optional(),
   FRP_INGRESS_INGRESS_SERVICE_PORT_NUMBER: z.coerce.number().optional(),
+
+  FRP_INGRESS_METADATA_ALLOWED_ANNOTATIONS: z.string().default('').transform(value => value === '' ? [] : value.split(',')),
 }).parse(process.env);
 
 const config = {
@@ -57,6 +59,7 @@ const config = {
         number: env.FRP_INGRESS_INGRESS_SERVICE_PORT_NUMBER,
       },
     },
+    allowedAnnotations: env.FRP_INGRESS_METADATA_ALLOWED_ANNOTATIONS,
   },
 };
 
@@ -75,6 +78,7 @@ const frpRequestSchema = z.union([
       proxy_type: z.string(),
       subdomain: z.string().optional(),
       custom_domains: z.array(z.string()).optional(),
+      metas: z.record(z.string()).default(() => ({})),
     }).passthrough(),
   }),
   z.object({
@@ -119,7 +123,7 @@ app.post('/', async (req, res) => {
 
       const name = `${config.appInstance}-${request.content.proxy_name}`;
       
-      const { subdomain, custom_domains = [] } = request.content;
+      const { subdomain, custom_domains = [], metas } = request.content;
       const hosts: string[] = [];
       let secretName: string | undefined;
 
@@ -163,6 +167,11 @@ app.post('/', async (req, res) => {
           name,
           annotations: {
             ...config.ingress.annotations,
+            ...Object.fromEntries(
+              config.ingress.allowedAnnotations
+                .map(annotation => `annotations/${annotation}` in metas ? [annotation, metas[`annotations/${annotation}`]] : null)
+                .filter(Boolean)
+            ),
             'app.kubernetes.io/managed-by': config.appInstance,
             'frp-ingress.io/ingress-instance': config.appInstance,
             'frp-ingress.io/proxy-name': request.content.proxy_name,
